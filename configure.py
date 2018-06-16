@@ -25,7 +25,7 @@ UPDOWN='/etc/strongswan/aws.updown'
 BGPDCONF='/etc/quagga/bgpd.conf'
 TRACKFILE='/etc/strongswan/.vpntrackfile'
 
-# We'll be removing certain lines from different files later on, so creating a function for that
+# We'll be removing certain lines (config) from different files later on, so creating a function for that
 def remove_stuff(item,file,num):
 	counter = 0
 	for line in fileinput.input(file, inplace=True):
