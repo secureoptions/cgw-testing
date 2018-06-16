@@ -33,7 +33,7 @@ def remove_stuff(item,file,num):
 			if line.startswith(str(item)):
 				counter = num
 			else:
-				print line,
+				print line, 
 		else:
 			counter -= 1
 
