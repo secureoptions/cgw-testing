@@ -25,4 +25,4 @@ For BGP VPNs, use the type 'dynamic' and for static VPNs, provide the *remote* V
  6) Check the box that says *I acknowledge that AWS CloudFormation might create IAM resources.*
  7) click __Update__
  
- 
+ It can take 2 or 3 minutes for updates to take effect
