@@ -8,7 +8,7 @@ For the *VGWs & Routing* parameter provide any VGW that you want to establish a 
 
 For BGP VPNs, use the type 'dynamic' and for static VPNs, provide the *remote* VPC CIDR. You can list multiple VGWs in the following format:
 
-<vgw id>,<type>,<vgw id>,<type>
+\<vgw id\>,\<type\>,\<vgw id\>,\<type\>
   
  for example:
  
