@@ -19,4 +19,10 @@ For BGP VPNs, use the type 'dynamic' and for static VPNs, provide the *remote* V
  ## Adding or Removing Existing VPNs
  1) Select the cloudformation stack
  2) Select __Actions > Update Stack__
- 3) 
+ 3) Choose __Use current template__ and click __Next__
+ 4) Add or remove the desired VGWs(remember to remove its routing type as well) and click __Next__
+ 5) Scroll to the bottom of the next page and click __Next__
+ 6) Check the box that says *I acknowledge that AWS CloudFormation might create IAM resources.*
+ 7) click __Update__
+ 
+ 
