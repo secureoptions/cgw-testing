@@ -235,13 +235,16 @@
 		},     
 	
 		"CgwEip":{
-		   "Type" : "AWS::EC2::EIP"
+		   "Type" : "AWS::EC2::EIP",
+		   "Properties" : {
+				"Domain": "vpc"
+				}
 		},
 		"CgwEipAssociate":{
 		   "Type": "AWS::EC2::EIPAssociation",
 		   "Properties": {
-			  "EIP": {"Ref":"CgwEip"},
-			  "InstanceId": {"Ref":"CgwEc2"}
+			  "InstanceId": {"Ref":"CgwEc2"},
+			  "AllocationId": {"Fn::GetAtt" : [ "CgwEip","AllocationId"]}
 		   }
 		},
 		
@@ -308,6 +311,7 @@
 		
 		"CgwEc2":{
 			"Type" : "AWS::EC2::Instance",
+			"DependsOn": "CgwIgwAttachment",
 			"Metadata" : {
 			     "AWS::CloudFormation::Init" : {
 					"config" : {
