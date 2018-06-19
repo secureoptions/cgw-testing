@@ -7,7 +7,7 @@
 					"Label": {
 						"default": "Configuration Details"
 					},
-					"Parameters": ["Type", "SshKey", "SshSource", "VpcCidr", "SubnetCidr", "Asn", "Vgws"]
+					"Parameters": ["Type", "SshKey", "SshSource", "VpcCidr", "SubnetCidr", "Asn", "Vgws", "IkeVersion", "IkeParameters", "IkeLifetime", "EspParameters", "EspLifetime", "Margin", "Fuzz" ]
 				}],
 
 			"ParameterLabels": {
@@ -31,8 +31,29 @@
 				},
 				"Vgws": {
 					"default": "VGWs & Routing"
+				},
+				"IkeVersion": {
+					"default": "IKE Version"
+				},
+				"IkeParameters": {
+					"default": "IKE Parameters"
+				},
+				"IkeLifetime": {
+					"default": "IKE Lifetime"
+				},
+				"EspParameters": {
+					"default": "IPSEC Parameters"
+				},
+				"EspLifetime": {
+					"default": "IPSEC Lifetime"
+				},
+				"Margin": {
+					"default": "Soft-lifetime"
+				},
+				"Fuzz": {
+					"default": "Rekey Fuzz"
 				}
-				
+					
 			}
 
 		}
@@ -85,6 +106,42 @@
 			"Default": "vgw-xxxxxxxx,dynamic,vgw-yyyyyyyy,192.168.0.0/16",
 			"AllowedPattern": "(vgw-[a-zA-Z0-9]{8,17},(dynamic|(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})),?)*",
 			"ConstraintDescription": "must be in the form 'vgw-xxxxxxxx,dynamic' or 'vgw-xxxxxxxx,10.0.0.0/16'"
+			},
+		"IkeVersion":{
+			"Description": "IKE version to use (ikev1 or ikev2)",
+			"Type": "String",
+			"Default": "ikev1"
+			},
+		"IkeLifetime": {
+			"Description": "IKE lifetime. You can define it in days (d), hours (h), minutes (m), seconds (s)",
+			"Type": "String",
+			"Default": "8h"
+			},
+		"IkeParameters": {
+			"Description": "IKE encryption, integrity, dh group. Specify in form <enc>-<integ>-<dhgroup>!",
+			"Type": "String",
+			"Default": "aes128-sha1-modp1024!"
+			},
+		"EspParameters": {
+			"Description": "IPSEC encryption, integrity, PFS dh group. Specify in form <enc>-<integ>-<dhgroup>!",
+			"Type": "String",
+			"Default": "aes128-sha1-modp1024!"
+			},
+		"EspLifetime": {
+			"Description": "IPSEC lifetime. You can define it in days (d), hours (h), minutes (m), seconds (s)",
+			"Type": "String",
+			"Default": "1h"
+			},
+			
+		"Margin" : {
+			"Description": "Soft-lifetime in minutes. Specify as <integer>m",
+			"Type": "String",
+			"Default": "5m"
+			},
+		"Fuzz": {
+			"Description": "Rekey-fuzz value. The deployed CGW may have several VPNs on it, so 25% randomization is recommended in that case",
+			"Type": "String",
+			"Default": "50%"
 			}
 	},
 	
@@ -379,6 +436,34 @@
 							"CIP":{
 								"command": "echo EIP=\"'$EIP'\" >> /etc/strongswan/swvars.py",
 								"env": { "EIP": {"Ref": "CgwEip"}}
+							},
+							"IKEVERSION": {
+								"command" : "echo IKEVERSION=\"'$IKEVERSION'\" >> /etc/strongswan/swvars.py",
+								"env": { "IKEVERSION": {"Ref": "IkeVersion"}}
+							},
+							"IKEPARAMETERS": {
+								"command" : "echo IKEPARAMETERS=\"'$IKEPARAMETERS'\" >> /etc/strongswan/swvars.py",
+								"env": { "IKEPARAMETERS": {"Ref": "IkeParameters"}}
+							},
+							"IKELIFETIME": {
+								"command" : "echo IKELIFETIME=\"'$IKELIFETIME'\" >> /etc/strongswan/swvars.py",
+								"env": { "IKELIFETIME": {"Ref": "IkeLifetime"}}
+							},
+							"ESPPARAMETERS": {
+								"command" : "echo ESPPARAMETERS=\"'$ESPPARAMETERS'\" >> /etc/strongswan/swvars.py",
+								"env": { "ESPPARAMETERS": {"Ref": "EspParameters"}}
+							},
+							"ESPLIFETIME": {
+								"command" : "echo ESPLIFETIME=\"'$ESPLIFETIME'\" >> /etc/strongswan/swvars.py",
+								"env": { "ESPLIFETIME": {"Ref": "EspLifetime"}}
+							},
+							"MARGIN": {
+								"command" : "echo MARGIN=\"'$MARGIN'\" >> /etc/strongswan/swvars.py",
+								"env": { "MARGIN": {"Ref": "Margin"}}
+							},
+							"FUZZ": {
+								"command" : "echo FUZZ=\"'$FUZZ'\" >> /etc/strongswan/swvars.py",
+								"env": { "FUZZ": {"Ref": "Fuzz"}}
 							},
 							"LOCAL_ROUTES":{
 								"command": "echo LOCAL_ROUTES=\"'$LOCAL_ROUTES'\" >> /etc/strongswan/swvars.py",
