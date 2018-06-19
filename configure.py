@@ -1,5 +1,5 @@
 import boto3
-from swvars import ASN,VGWS,EIP,LOCAL_ROUTES
+from swvars import ASN,VGWS,EIP,LOCAL_ROUTES,IKEVERSION,IKEPARAMETERS,IKELIFETIME,ESPPARAMETERS,ESPLIFETIME,MARGIN,FUZZ
 from botocore.exceptions import ClientError
 import xml.etree.ElementTree as ET
 import sys
@@ -126,19 +126,19 @@ def make_vpn(x,y,z):
 					def add_config(li,ro,ri,vtinum,psk,num):
 						with open(SWCONF,'ab') as f:
 							f.write('conn ' + str(x) + '-' + num + '\n')
-							f.write('\tkeyexchange=ikev1\n')
+							f.write('\tkeyexchange=' + str(IKEVERSION) + '\n')
 							f.write('\tauto=start\n')
 							f.write('\ttype=tunnel\n')
 							f.write('\tauthby=secret\n')
 							f.write('\tleftid=' + str(CGW_OUTSIDE) + '\n')
 							f.write('\tleft=%defaultroute\n')
 							f.write('\tright=' + str(ro) + '\n')
-							f.write('\tikelifetime=8h\n')
-							f.write('\tlifetime=1h\n')
-							f.write('\tmargintime=1m\n')
-							f.write('\trekeyfuzz=0%\n')
-							f.write('\tesp=aes128-sha1-modp1024!\n')
-							f.write('\tike=aes128-sha1-modp1024!\n')
+							f.write('\tikelifetime='+ str(IKELIFETIME) + '\n')
+							f.write('\tlifetime=' + str(ESPLIFETIME) + '\n')
+							f.write('\tmargintime=' + str(MARGIN) + '\n')
+							f.write('\trekeyfuzz=' + str(FUZZ) + '\n')
+							f.write('\tesp=' + str(ESPPARAMETERS) + '\n')
+							f.write('\tike=' + str(IKEPARAMETERS) + '\n')
 							f.write('\tkeyingtries=%forever\n')
 							f.write('\tleftsubnet=0.0.0.0/0\n')
 							f.write('\trightsubnet=0.0.0.0/0\n')
