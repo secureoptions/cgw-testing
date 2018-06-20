@@ -1,7 +1,7 @@
 # cgw-testing
 
 ## Deployment instructions
-1) <a href="https://console.aws.amazon.com/cloudformation/#/stacks/new?stackName=CloudShroud&templateURL=https://s3.amazonaws.com/secure-options/cgw-tester.json"><img src="https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png"/></a>
+1) <a href="https://console.aws.amazon.com/cloudformation/#/stacks/new?stackName=CGW-Testing&templateURL=https://s3.amazonaws.com/secure-options/cgw-tester.json"><img src="https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png"/></a>
 2) Specify the details needed to deploy a new Strongswan CGW, VPC, subnet, VPNs, etc.
 
 For the *VGWs & Routing* parameter provide any VGW that you want to establish a new VPN to. The VGW must be owned by your account, but it does not have to be in the same region as the CF stack. For each VGW you specify, followed it with a comma and the type of routing you want to create the VPN with. 
