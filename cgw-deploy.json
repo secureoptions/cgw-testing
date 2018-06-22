@@ -500,8 +500,7 @@
 						} ],
 			  "UserData": { "Fn::Base64" : { "Fn::Join" : ["", [
 				 "#!/bin/bash -xe\n",
-				 "curl https://s3.amazonaws.com/cloudformation-examples/enable-epel-on-amazon-linux-ami > /etc/yum.repos.d/epel.repo\n",
-				 "chmod 000644 /etc/yum.repos.d/epel.repo\n",
+				 "yum-config-manager --enable epel\n",
 				 "yum install strongswan -y\n",
 				 "yum install quagga -y\n",
 				 "pip install boto3\n",
@@ -515,5 +514,3 @@
       }
     }
  }
-
-     
