@@ -45,7 +45,12 @@ def make_vpn(x,y,z):
 	for i in response['Regions']:
 			EC2 = boto3.client('ec2',region_name=i['RegionName'])
 			try:
-					GATEWAYS = EC2.describe_vpn_gateways(VpnGatewayIds=[x])
+					# Find if we're working with a VGW or TGW
+					TGWEXISTS = re.search('tgw-',x)
+					if TGWEXISTS:
+						GATEWAYS = EC2.describe_transit_gateways(TransitGatewayIds=[x],ResourceOwner='self')
+					else:
+						GATEWAYS = EC2.describe_vpn_gateways(VpnGatewayIds=[x])
 					
 					# The VGW exists in this region, so let's create a CGW in the same region so we can create a VPN to it
 					CGW = EC2.create_customer_gateway(
@@ -55,15 +60,25 @@ def make_vpn(x,y,z):
 					)
 					CGW = CGW['CustomerGateway']['CustomerGatewayId']
 					
-					# Create a new VPN with the above information
-					VPNCONNECTION = EC2.create_vpn_connection(
-							CustomerGatewayId=CGW,
-							Type='ipsec.1',
-							VpnGatewayId=x,
-							Options={
-								'StaticRoutesOnly': y
-							}
-						)
+					if TGWEXISTS:
+						# Create a new VPN with the above information
+						VPNCONNECTION = EC2.create_vpn_connection(
+								CustomerGatewayId=CGW,
+								Type='ipsec.1',
+								TransitGatewayId = x,
+								Options={
+									'StaticRoutesOnly': y
+								}
+							)
+					else:
+						VPNCONNECTION = EC2.create_vpn_connection(
+								CustomerGatewayId=CGW,
+								Type='ipsec.1',
+								VpnGatewayId = x,
+								Options={
+									'StaticRoutesOnly': y
+								}
+							)
 					VPNCONNECTIONID=VPNCONNECTION['VpnConnection']['VpnConnectionId']
 					
 					# We need to track this VPN id in case we need to delete it later
@@ -161,7 +176,8 @@ def make_vpn(x,y,z):
 					
 					
 			except ClientError as e:
-				if e.response['Error']['Code'] == 'InvalidVpnGatewayID.NotFound':
+				print e
+				if e.response['Error']['Code'] == 'InvalidVpnGatewayID.NotFound' or e.response['Error']['Code'] == 'InternalError':
 					pass
 
 def delete_vpn(vgw):
@@ -170,8 +186,16 @@ def delete_vpn(vgw):
 		# Delete VPN if user has removed the VGW
 		for i in response['Regions']:
 			EC2 = boto3.client('ec2',region_name=i['RegionName'])
+			
+			# Find if we're working with a VGW or TGW
+			TGWEXISTS = re.search('tgw-',vgw)
+			if TGWEXISTS:
+				VPNGWID = 'transit-gateway-id'
+			else:
+				VPNGWID = 'vpn-gateway-id'
+			
 			VPNCONNECTIONS = EC2.describe_vpn_connections(
-				 Filters=[{'Name': 'vpn-gateway-id','Values': [vgw]}]
+				 Filters=[{'Name': VPNGWID,'Values': [vgw]}]
 				 )
 			# Get the list of VPNs that were created with by this solution
 			with open(TRACKFILE) as t:
@@ -259,7 +283,7 @@ with open(SWCONF) as s:
 	content = s.readlines()
 	ACTIVEVGWS = []
 	for line in content:
-		pattern = re.search('.*(vgw-[a-zA-Z0-9]*)-0', line)
+		pattern = re.search('.*([t|v]gw-[a-zA-Z0-9]*)-0', line)
 		if pattern:
 			print pattern.group(1)
 			ACTIVEVGWS.append(pattern.group(1))
