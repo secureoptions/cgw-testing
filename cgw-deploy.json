@@ -329,6 +329,7 @@
 								"ec2:DeleteVpnConnection",
 								"ec2:DeleteVpnConnectionRoute",
 								"ec2:DeleteCustomerGateway",
+								"cloudformation:CreateStack",
 								"cloudformation:DescribeStackResources",
 								"cloudformation:DescribeStackResource"
 							],
