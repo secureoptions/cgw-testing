@@ -477,10 +477,10 @@
 								"command": "echo LOCAL_ROUTES=\"'$LOCAL_ROUTES'\" >> /etc/strongswan/swvars.py",
 								"env": { "LOCAL_ROUTES": {"Ref": "VpcCidr"}}
 							},
-							"STARTA": {
+							"STARTZ": {
 								"command": "/usr/bin/python /etc/strongswan/configure.py"
 							},
-							"STARTZ": {
+							"STARTA": {
 								"command": "/opt/aws/bin/cfn-hup --verbose"
 							}
 						}
