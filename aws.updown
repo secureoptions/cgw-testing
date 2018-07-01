@@ -63,8 +63,8 @@ add_route() {
 	then
 		sudo echo "        neighbor ${TUNNEL_REMOTE_ADDRESS} remote-as ${ASN}" >> ${BGPDCONF}
 		sudo echo "        neighbor ${TUNNEL_REMOTE_ADDRESS} soft-reconfiguration inbound" >> ${BGPDCONF}
-		sudo service bgpd restart
 		sudo service zebra restart
+		sudo service bgpd restart
 	else
 		# if not using BGP, create a static route. ASN here is the CIDR really
 		sudo ip route add ${ASN} dev ${TUNNEL_NAME}
@@ -82,8 +82,8 @@ cleanup_settings() {
 		sudo sed -i "s/        neighbor ${TUNNEL_REMOTE_ADDRESS} remote-as ${ASN}//g" ${BGPDCONF}
 		sudo sed -i "s/        neighbor ${TUNNEL_REMOTE_ADDRESS} soft-reconfiguration inbound//g" ${BGPDCONF}
 		sudo sed -i '/^$/d' ${BGPDCONF}
-		sudo service bgpd restart
 		sudo service zebra restart
+		sudo service bgpd restart
 	else
 		sudo ip route del ${ASN} dev ${TUNNEL_NAME}
 	fi
