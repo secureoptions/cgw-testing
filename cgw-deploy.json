@@ -433,6 +433,9 @@
 							"AA": {
 								"command": "rm -f /etc/strongswan/swvars.py"
 								},
+							"AAA": {
+								"command": "killall cfn-hup"
+								},
 							"BSN":{
 								"command": "echo ASN=\"$ASN\" >> /etc/strongswan/swvars.py",
 								"env": { "ASN": {"Ref": "Asn"}}
@@ -440,10 +443,6 @@
 							"BGWS":{
 								"command": "echo VGWS=\"'$VGWS'\" >> /etc/strongswan/swvars.py",
 								"env": { "VGWS": {"Ref": "Vgws"}}
-							},
-							"CIP":{
-								"command": "echo EIP=\"'$EIP'\" >> /etc/strongswan/swvars.py",
-								"env": { "EIP": {"Ref": "CgwEip"}}
 							},
 							"IKEVERSION": {
 								"command" : "echo IKEVERSION=\"'$IKEVERSION'\" >> /etc/strongswan/swvars.py",
