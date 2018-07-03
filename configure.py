@@ -1,14 +1,16 @@
 import boto3
-from swvars import ASN,VGWS,EIP,LOCAL_ROUTES,IKEVERSION,IKEPARAMETERS,IKELIFETIME,ESPPARAMETERS,ESPLIFETIME,MARGIN,FUZZ
+from swvars import ASN,VGWS,LOCAL_ROUTES,IKEVERSION,IKEPARAMETERS,IKELIFETIME,ESPPARAMETERS,ESPLIFETIME,MARGIN,FUZZ
 from botocore.exceptions import ClientError
 import xml.etree.ElementTree as ET
 import sys
 import os
 import re
 import fileinput
+from ec2_metadata import ec2_metadata
 from subprocess import call
 from time import sleep
 
+EIP = ec2_metadata.public_ipv4
 client = boto3.client('ec2',region_name = 'us-east-2')
 
 # Stop the strongswan service so we can update its configuration smoothly
