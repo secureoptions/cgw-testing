@@ -142,6 +142,11 @@
 			"Description": "Rekey-fuzz value. The deployed CGW may have several VPNs on it, so 25% randomization is recommended in that case",
 			"Type": "String",
 			"Default": "50%"
+			},
+		"ApiModel": {
+			"Description": "The S3 bucket/object path that contains the model json for custom API support. The S3 bucket does not have to be publicly accessible, but it does have to be in the same region and AWS account as this CF stack",
+			"Type": "String",
+			"Default": "S3bucket/path/to/service.json"
 			}
 	},
 	
@@ -322,13 +327,15 @@
 								"ec2:CreateCustomerGateway",
 								"ec2:CreateVpnConnectionRoute",
 								"ec2:DescribeCustomerGateways",
-								"ec2:DescribeTransitGateways",
 								"ec2:DescribeVpnConnections",
 								"ec2:DescribeVpnGateways",
+								"ec2:DescribeTransitGateways",
 								"ec2:DescribeRegions",
 								"ec2:DeleteVpnConnection",
 								"ec2:DeleteVpnConnectionRoute",
 								"ec2:DeleteCustomerGateway",
+								"s3:GetObject",
+								"s3:HeadBucket",
 								"cloudformation:CreateStack",
 								"cloudformation:DescribeStackResources",
 								"cloudformation:DescribeStackResource"
@@ -433,12 +440,16 @@
 							"AA": {
 								"command": "rm -f /etc/strongswan/swvars.py"
 								},
-							"AAA": {
-								"command": "killall cfn-hup"
+							"AB": {
+								"command": "killall cfn-hup",
+								"ignoreErrors" : "true"
 								},
 							"BSN":{
 								"command": "echo ASN=\"$ASN\" >> /etc/strongswan/swvars.py",
 								"env": { "ASN": {"Ref": "Asn"}}
+							},
+							"BAM": {
+								"command": "/opt/aws/bin/cfn-hup --verbose"
 							},
 							"BGWS":{
 								"command": "echo VGWS=\"'$VGWS'\" >> /etc/strongswan/swvars.py",
@@ -476,12 +487,15 @@
 								"command": "echo LOCAL_ROUTES=\"'$LOCAL_ROUTES'\" >> /etc/strongswan/swvars.py",
 								"env": { "LOCAL_ROUTES": {"Ref": "VpcCidr"}}
 							},
-							"STARTZ": {
-								"command": "/usr/bin/python /etc/strongswan/configure.py"
+							"MODEL": {
+								"command": "echo APIMODEL=\"'$APIMODEL'\" >> /etc/strongswan/swvars.py",
+								"env": {"APIMODEL": {"Ref": "ApiModel"}}
 							},
-							"STARTA": {
-								"command": "/opt/aws/bin/cfn-hup --verbose"
+							"STARTZ": {
+								"command": "/usr/bin/python /etc/strongswan/configure.py",
+								"ignoreErrors": "true"
 							}
+
 						}
 				}
 			}
@@ -509,6 +523,7 @@
 				 "#!/bin/bash -xe\n",
 				 "yum-config-manager --enable epel\n",
 				 "pip install boto3\n",
+				 "pip install ec2-metadata\n",
 				 "# Install the files and packages from the metadata\n",
 				 "/opt/aws/bin/cfn-init -v ",
 				 "         --stack ", { "Ref" : "AWS::StackName" },
