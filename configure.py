@@ -17,7 +17,6 @@ try:
 	call(["aws", "configure", "add-model", "--service-model", "file:///tmp/service-2.json", "--service-name", "ec2"])
 except:
 	print "User's model was either inaccessible or non-existent"
-	continue
 
 EIP = ec2_metadata.public_ipv4
 client = boto3.client('ec2',region_name = 'us-east-2')
