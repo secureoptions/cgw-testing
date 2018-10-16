@@ -1,5 +1,12 @@
 # cgw-testing
 
+## What this tool does
+1) Creates a new VPC 
+2) Creates single public subnet in the new VPC
+3) Creates a Customer Gateway (Strongswan) in the public subnet
+4) A script on the Customer Gateway will automatically create VPN tunnels to the VGW id(s) that the user specifis in Cloudformation
+
+
 ## Deployment instructions
 1) <a href="https://console.aws.amazon.com/cloudformation/#/stacks/new?stackName=CGW-Testing&templateURL=https://s3.amazonaws.com/secure-options/cgw-tester.json"><img src="https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png"/></a>
 2) Specify the details needed to deploy a new Strongswan CGW, VPC, subnet, VPNs, etc.
