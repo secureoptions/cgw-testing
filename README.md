@@ -19,7 +19,7 @@ For BGP VPNs, use the type 'dynamic' and for static VPNs, provide the *remote* V
   
  for example:
  
- vgw-xxxxxxxx,dynamic,vgw-yyyyyyyy,192.168.0.0/16
+ vgw-xxxxxxxx,dynamic,vgw-yyyyyyyy,192.168.0.0/16,tgw-zzzzzzzz,dynamic
  
  Note: Make sure NOT to use spaces between commas and values. Cloudformation will throw an error if you do
  
