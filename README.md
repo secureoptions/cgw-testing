@@ -4,7 +4,7 @@
 1) Creates a new VPC 
 2) Creates single public subnet in the new VPC
 3) Creates a Customer Gateway (Strongswan) in the public subnet
-4) A script on the Customer Gateway will automatically create VPN tunnels to the VGW id(s) that the user specifis in Cloudformation
+4) A script on the Customer Gateway will automatically create VPN tunnels to the VGW id(s) that the user specifies in Cloudformation
 
 
 ## Deployment instructions
