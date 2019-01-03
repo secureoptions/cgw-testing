@@ -13,15 +13,6 @@ from time import sleep
 
 s3 = boto3.resource('s3')
 
-try:
-	# Enable API support for TGW
-	APIMODEL = APIMODEL.split('/')
-	s3.meta.client.download_file(APIMODEL[0], '/'.join(APIMODEL[1:len(APIMODEL)]), '/tmp/service-2.json')
-	call(["aws", "configure", "add-model", "--service-model", "file:///tmp/service-2.json", "--service-name", "ec2"])
-except Exception as e:
-	print e
-	print "User's model was either inaccessible or non-existent"
-
 EIP = ec2_metadata.public_ipv4
 client = boto3.client('ec2',region_name = 'us-east-2')
 
