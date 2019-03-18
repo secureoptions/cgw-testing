@@ -31,7 +31,7 @@ For BGP VPNs, use the type 'dynamic' and for static VPNs, provide the *remote* V
  7) click __Update__
  
  You can also update any IPSEC parameters through Cloudformation, but you cannot change the VPN type (ie. Dynamic vs. Static) or the Strongswan version that was installed at deployment. If you wish to create a different VPN type, then you must:
- 1) Remove the <gw id>, <type> and update the stack.
+ 1) Remove the '\<gw id\>, \<type\>' and update the stack.
  2) After the update has successfully finished, and you see the previous VPN deleted, you may re-add the VPN with the desired type in a second stack update.
   
  It can take 2 or 3 minutes for updates to take effect
