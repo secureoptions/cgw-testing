@@ -10,7 +10,7 @@ import subprocess
 ec2 = boto3.client('ec2', region_name='us-east-1')
 
 # Setup sqlite3 
-conn = sqlite3.connect('db.sqlite3')
+conn = sqlite3.connect('cgwdb.sqlite3')
 c = conn.cursor()
 c.execute('''CREATE TABLE IF NOT EXISTS resources(cgw text, vpn text, gateway text, region text)''')
 
