@@ -9,8 +9,11 @@ import subprocess
 
 ec2 = boto3.client('ec2', region_name='us-east-1')
 
+# stop strongswan before continuing
+subprocess.call(['ipsec','stop'])
+
 # Setup sqlite3 
-conn = sqlite3.connect('cgwdb.sqlite3')
+conn = sqlite3.connect('/etc/strongswan/cgw-db.sqlite3')
 c = conn.cursor()
 c.execute('''CREATE TABLE IF NOT EXISTS resources(cgw text, vpn text, gateway text, region text)''')
 
@@ -67,109 +70,101 @@ def configure_quagga(remote_asn, remote_tunnel_ip):
 # Iterate through all gateways and see if they exist in a AWS region           
 mark = 0
 for g in gws_dict:
-    # See if GW id exists in DB. If it does, skip configuration
-    c.execute('''SELECT gateway FROM resources WHERE gateway=?''', (g,))
-    exists = c.fetchall()
-    if not exists:
-        match = re.match(r'tgw.*', g)
-        for r in regions:
-            ec2 = boto3.client('ec2', region_name=r['RegionName'])
-            if match:
-                try:
-                    ec2.describe_transit_gateways(
-                        TransitGatewayIds=[g]
-                    )
+ 
+    match = re.match(r'tgw.*', g)
+    for r in regions:
+        ec2 = boto3.client('ec2', region_name=r['RegionName'])
+        if match:
+            try:
+                ec2.describe_transit_gateways(
+                    TransitGatewayIds=[g]
+                )
 
-                    # Check whether a VPN should be static or dynamic. Use variable when creating VPN
-                    if gws_dict[g] == 'dynamic':
-                        rtype = False
-                    else:
-                        rtype = True
-                    
-                    cgw = a.Cgw(b.asn, region_name=r['RegionName'])
-                    vpn = a.Vpn(cgw.id, g, rtype, region_name=r['RegionName'])
+                # Check whether a VPN should be static or dynamic. Use variable when creating VPN
+                if gws_dict[g] == 'dynamic':
+                    rtype = False
+                else:
+                    rtype = True
+                
+                cgw = a.Cgw(b.asn, region_name=r['RegionName'])
+                vpn = a.Vpn(cgw.id, g, rtype, region_name=r['RegionName'])
 
-                    # Add the connection metadata to db
-                    c.execute('INSERT INTO resources VALUES(?,?,?,?)',(cgw.id, vpn.name, g, r['RegionName']))
+                # Configure tunnel 1
+                mark = int(mark)
+                mark += 10
+                mark = str(mark)
+                
+                strongswan_config(vpn.name + '-0', b.ikeVersion, vpn.cgw_outside, vpn.remote_outside1, b.ikeLifeTime, b.espLifeTime, b.margin, b.fuzz, b.espParameters, b.ikeParameters, mark,
+                'vti' + mark, vpn.local_inside1, vpn.remote_inside1, mark, gws_dict[g])
 
-                    # Configure tunnel 1
-                    mark = int(mark)
-                    mark += 10
-                    mark = str(mark)
-                    
-                    strongswan_config(vpn.name + '-0', b.ikeVersion, vpn.cgw_outside, vpn.remote_outside1, b.ikeLifeTime, b.espLifeTime, b.margin, b.fuzz, b.espParameters, b.ikeParameters, mark,
-                    'vti' + mark, vpn.local_inside1, vpn.remote_inside1, mark, gws_dict[g])
+                psk_config(vpn.remote_outside1, vpn.psk1)
 
-                    psk_config(vpn.remote_outside1, vpn.psk1)
+                # see if the VPN is dynamic or static. If dynamic create entry in BGP config
+                if gws_dict[g] == 'dynamic':
+                    configure_quagga(vpn.remote_asn, vpn.remote_inside1)
 
-                    # see if the VPN is dynamic or static. If dynamic create entry in BGP config
-                    if gws_dict[g] == 'dynamic':
-                        configure_quagga(vpn.remote_asn, vpn.remote_inside1)
+                # Configure tunnel 2
+                mark = int(mark)
+                mark += 10
+                mark = str(mark)
+                
+                strongswan_config(vpn.name + '-1', b.ikeVersion, vpn.cgw_outside, vpn.remote_outside2, b.ikeLifeTime, b.espLifeTime, b.margin, b.fuzz, b.espParameters, b.ikeParameters, mark,
+                'vti'+ mark, vpn.local_inside2, vpn.remote_inside2, mark, gws_dict[g])
 
-                    # Configure tunnel 2
-                    mark = int(mark)
-                    mark += 10
-                    mark = str(mark)
-                    
-                    strongswan_config(vpn.name + '-1', b.ikeVersion, vpn.cgw_outside, vpn.remote_outside2, b.ikeLifeTime, b.espLifeTime, b.margin, b.fuzz, b.espParameters, b.ikeParameters, mark,
-                    'vti'+ mark, vpn.local_inside2, vpn.remote_inside2, mark, gws_dict[g])
+                psk_config(vpn.remote_outside2, vpn.psk2)
+                if gws_dict[g] == 'dynamic':
+                    configure_quagga(vpn.remote_asn, vpn.remote_inside2)
 
-                    psk_config(vpn.remote_outside2, vpn.psk2)
-                    if gws_dict[g] == 'dynamic':
-                        configure_quagga(vpn.remote_asn, vpn.remote_inside2)
+                break
+            except ClientError as e:
+                if e.response['Error']['Code'] == 'InvalidTransitGatewayID.NotFound':
+                    pass
+    
+        else:
+            try:
+                ec2.describe_vpn_gateways(
+                    VpnGatewayIds=[g]
+                )
+                # Check whether a VPN should be static or dynamic. Use variable when creating VPN
+                if gws_dict[g] == 'dynamic':
+                    rtype = False
+                else:
+                    rtype = True
+                cgw = a.Cgw(b.asn, region_name=r['RegionName'])
+                vpn = a.Vpn(cgw.id, g, rtype, region_name=r['RegionName'])
+                
 
-                    break
-                except ClientError as e:
-                    if e.response['Error']['Code'] == 'InvalidTransitGatewayID.NotFound':
-                        pass
-        
-            else:
-                try:
-                    ec2.describe_vpn_gateways(
-                        VpnGatewayIds=[g]
-                    )
-                    # Check whether a VPN should be static or dynamic. Use variable when creating VPN
-                    if gws_dict[g] == 'dynamic':
-                        rtype = False
-                    else:
-                        rtype = True
-                    cgw = a.Cgw(b.asn, region_name=r['RegionName'])
-                    vpn = a.Vpn(cgw.id, g, rtype, region_name=r['RegionName'])
-                    
-                    # Add the connection metadata to db
-                    c.execute('INSERT INTO resources VALUES(?,?,?,?)', (cgw.id, vpn.name, g, r['RegionName']))
+                # Configure tunnel 1
+                mark = int(mark)
+                mark += 10
+                mark = str(mark)
+                
+                strongswan_config(vpn.name + '-0', b.ikeVersion, vpn.cgw_outside, vpn.remote_outside1, b.ikeLifeTime, b.espLifeTime, b.margin, b.fuzz, b.espParameters, b.ikeParameters, mark,
+                'vti'+ mark, vpn.local_inside1, vpn.remote_inside1, mark, gws_dict[g])
 
-                    # Configure tunnel 1
-                    mark = int(mark)
-                    mark += 10
-                    mark = str(mark)
-                    
-                    strongswan_config(vpn.name + '-0', b.ikeVersion, vpn.cgw_outside, vpn.remote_outside1, b.ikeLifeTime, b.espLifeTime, b.margin, b.fuzz, b.espParameters, b.ikeParameters, mark,
-                    'vti'+ mark, vpn.local_inside1, vpn.remote_inside1, mark, gws_dict[g])
+                psk_config(vpn.remote_outside1, vpn.psk1)
 
-                    psk_config(vpn.remote_outside1, vpn.psk1)
+                if gws_dict[g] == 'dynamic':
+                    configure_quagga(vpn.remote_asn, vpn.remote_inside1)
 
-                    if gws_dict[g] == 'dynamic':
-                        configure_quagga(vpn.remote_asn, vpn.remote_inside1)
+                # Configure tunnel 2
+                mark = int(mark)
+                mark += 10
+                mark = str(mark)
+                
+                strongswan_config(vpn.name + '-1', b.ikeVersion, vpn.cgw_outside, vpn.remote_outside2, b.ikeLifeTime, b.espLifeTime, b.margin, b.fuzz, b.espParameters, b.ikeParameters, mark,
+                'vti'+ mark, vpn.local_inside2, vpn.remote_inside2, mark, gws_dict[g])
 
-                    # Configure tunnel 2
-                    mark = int(mark)
-                    mark += 10
-                    mark = str(mark)
-                    
-                    strongswan_config(vpn.name + '-1', b.ikeVersion, vpn.cgw_outside, vpn.remote_outside2, b.ikeLifeTime, b.espLifeTime, b.margin, b.fuzz, b.espParameters, b.ikeParameters, mark,
-                    'vti'+ mark, vpn.local_inside2, vpn.remote_inside2, mark, gws_dict[g])
+                psk_config(vpn.remote_outside2, vpn.psk2)
 
-                    psk_config(vpn.remote_outside2, vpn.psk2)
-
-                    if gws_dict[g] == 'dynamic':
-                        configure_quagga(vpn.remote_asn, vpn.remote_inside2)
+                if gws_dict[g] == 'dynamic':
+                    configure_quagga(vpn.remote_asn, vpn.remote_inside2)
 
 
-                    break
-                except ClientError as e:
-                    if e.response['Error']['Code'] == 'InvalidVpnGatewayID.NotFound':
-                        pass
+                break
+            except ClientError as e:
+                if e.response['Error']['Code'] == 'InvalidVpnGatewayID.NotFound':
+                    pass
 
 # Compare each VPN in the DB against each gw in the list. Delete VPNs that user removed
 c.execute("SELECT vpn, gateway, region FROM resources")
@@ -182,4 +177,4 @@ for vpn in existing_conns:
 
 conn.commit()
 conn.close()
-subprocess.call(['/usr/sbin/ipsec','restart'])
+subprocess.call(['ipsec','start'])
