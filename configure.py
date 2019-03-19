@@ -29,7 +29,7 @@ regions = regions['Regions']
 
 def strongswan_config(*args):
     # configure strongswan
-    with open('/etc/ipsec.conf', 'aw+') as f:
+    with open('/etc/ipsec.conf', 'ab+') as f:
         f.write('conn %s\n'
                 '\tkeyexchange=%s\n'
                 '\tauto=start\n'
@@ -55,12 +55,12 @@ def strongswan_config(*args):
 
 def psk_config(remote_ip, psk):
     # configure ipsec PSK
-    with open('/etc/ipsec.secrets', 'aw+') as f:
+    with open('/etc/ipsec.secrets', 'ab+') as f:
         f.write('%%any %s : PSK "%s"\n' % (remote_ip, psk))
 
 def configure_quagga(remote_asn, remote_tunnel_ip):
     # configure quagga
-    with open('/etc/quagga/bgpd.conf', 'aw+') as f:
+    with open('/etc/quagga/bgpd.conf', 'ab+') as f:
         f.write('\tneighbor {0} remote-as {1}\n'
 		        '\tneighbor {0} soft-reconfiguration inbound\n' .format (remote_tunnel_ip, remote_asn))
 
