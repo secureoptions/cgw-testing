@@ -6,6 +6,8 @@
 3) Creates a Customer Gateway (Strongswan) in the public subnet
 4) A script on the Customer Gateway will automatically create VPN tunnels to the VGW id(s) and TGW id(s) that the user specifies in Cloudformation
 
+__Please allow ~10 minutes *after* Cloudformation stack has to deployed for VPNs to be created.__
+
 
 ## Deployment instructions
 1) <a href="https://console.aws.amazon.com/cloudformation/#/stacks/new?stackName=CGW-Testing&templateURL=https://s3.amazonaws.com/secure-options/cgw-tester.json"><img src="https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png"/></a>
