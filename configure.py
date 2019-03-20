@@ -15,7 +15,8 @@ subprocess.call(['ipsec','stop'])
 # Setup sqlite3 
 conn = sqlite3.connect('/etc/strongswan/cgw-db.sqlite3')
 c = conn.cursor()
-c.execute('''CREATE TABLE IF NOT EXISTS resources(cgw text, vpn text, gateway text, region text)''')
+c.execute('''CREATE TABLE IF NOT EXISTS resources(gateway text PRIMARY KEY, cgw text, vpn text, region text)''')
+conn.commit()
 
 # Clean up user input and create list out of vgws string
 gws = b.vgws.replace(' ','').lower()
