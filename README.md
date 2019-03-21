@@ -37,3 +37,9 @@ For BGP VPNs, use the type 'dynamic' and for static VPNs, provide the *remote* V
  8) click __Update__
  
  It can take 2 or 3 minutes for updates to take effect.
+
+## ChangeLog
+### Version 2.0
+- Added ability to change Strongswan IPSEC parameters through Cloudformation Updates
+- Added ability to create VPNs to TGWs (stable)
+- Added ability to define Strongswan version to deploy as well as dependencies (installed through 'yum')
