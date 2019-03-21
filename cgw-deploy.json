@@ -1,13 +1,13 @@
 {
 	"AWSTemplateFormatVersion": "2010-09-09",
-	"Description": "Launches a test Strongswan CGW. Support dynamic or static VPNs",
+	"Description": "Launches a test Strongswan CGW. Supports dynamic or static VPNs",
 	"Metadata": {
 		"AWS::CloudFormation::Interface": {
 			"ParameterGroups": [{
 					"Label": {
 						"default": "Configuration Details"
 					},
-					"Parameters": ["Type", "SshKey", "SshSource", "VpcCidr", "SubnetCidr", "Asn", "Vgws", "IkeVersion", "IkeParameters", "IkeLifetime", "EspParameters", "EspLifetime", "Margin", "Fuzz" ]
+					"Parameters": ["Type", "SshKey", "SshSource", "VpcCidr", "SubnetCidr", "Asn", "Vgws", "IkeVersion", "IkeParameters", "IkeLifetime", "EspParameters", "EspLifetime", "Margin", "Fuzz", "StrongVersion", "StrongDependencies" ]
 				}],
 
 			"ParameterLabels": {
@@ -52,8 +52,15 @@
 				},
 				"Fuzz": {
 					"default": "Rekey Fuzz"
+				
+        },
+        "StrongVersion": {
+          "default": "Strongswan Version"
+				},
+				"StrongDependencies": {
+					"default": "Strongswan Build Dependencies"
 				}
-					
+	
 			}
 
 		}
@@ -63,8 +70,8 @@
 		"Type":{
 			"Description": "The instance type that you want to launch Strongswan CGW as.",
 			"Type":"String",
-			"AllowedValues": ["t2.micro", "t2.small", "t2.medium", "t2.large", "t2.xlarge", "t2.2xlarge", "m4.large", "m4.xlarge", "m4.2xlarge", "m4.4xlarge", "m4.10xlarge", "m4.16xlarge", "m5.large", "m5.xlarge", "m5.2xlarge", "m5.4xlarge", "m5.12xlarge", "m5.24xlarge", "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge", "c5.large", "c5.xlarge", "c5.2xlarge", "c5.4xlarge", "c5.9xlarge", "c5.18xlarge", "x1e.32xlarge", "x1e.16xlarge", "x1e.8xlarge", "x1e.4xlarge", "x1e.2xlarge", "x1e.xlarge", "x1.32xlarge", "x1.16xlarge", "r4.large", "r4.xlarge", "r4.2xlarge", "r4.4xlarge", "r4.8xlarge", "r4.16xlarge", "f1.2xlarge", "f1.16xlarge", "g3.4xlarge", "g3.8xlarge", "g3.16xlarge", "p2.xlarge", "p2.8xlarge", "p2.16xlarge", "p3.2xlarge", "p3.8xlarge", "p3.16xlarge", "d2.xlarge", "d2.2xlarge", "d2.4xlarge", "d2.8xlarge", "i3.large", "i3.xlarge", "i3.2xlarge", "i3.4xlarge", "i3.8xlarge", "i3.16xlarge", "h1.2xlarge", "h1.4xlarge", "h1.8xlarge", "h1.16xlarge"],
-			"Default": "t2.micro"
+			"AllowedValues": ["t2.medium", "t2.large", "t2.xlarge", "t2.2xlarge", "m4.large", "m4.xlarge", "m4.2xlarge", "m4.4xlarge", "m4.10xlarge", "m4.16xlarge", "m5.large", "m5.xlarge", "m5.2xlarge", "m5.4xlarge", "m5.12xlarge", "m5.24xlarge", "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge", "c5.large", "c5.xlarge", "c5.2xlarge", "c5.4xlarge", "c5.9xlarge", "c5.18xlarge", "x1e.32xlarge", "x1e.16xlarge", "x1e.8xlarge", "x1e.4xlarge", "x1e.2xlarge", "x1e.xlarge", "x1.32xlarge", "x1.16xlarge", "r4.large", "r4.xlarge", "r4.2xlarge", "r4.4xlarge", "r4.8xlarge", "r4.16xlarge", "f1.2xlarge", "f1.16xlarge", "g3.4xlarge", "g3.8xlarge", "g3.16xlarge", "p2.xlarge", "p2.8xlarge", "p2.16xlarge", "p3.2xlarge", "p3.8xlarge", "p3.16xlarge", "d2.xlarge", "d2.2xlarge", "d2.4xlarge", "d2.8xlarge", "i3.large", "i3.xlarge", "i3.2xlarge", "i3.4xlarge", "i3.8xlarge", "i3.16xlarge", "h1.2xlarge", "h1.4xlarge", "h1.8xlarge", "h1.16xlarge"],
+			"Default": "t2.medium"
 			},
 		"VpcCidr":{
 			"Description": "The VPC CIDR that you want to launch your CGW in.",
@@ -103,9 +110,9 @@
 		"Vgws":{
 			"Description": "Specify the VGW that you want to create a VPN with. Then specify type of VPN it should be (separated by comma). For BGP use 'dynamic', if it is a static VPN use the remote CIDR as the type. You can also create multiple VPN by separating the VGWs with commas as seen in the displayed example",
 			"Type":"String",
-			"Default": "vgw-xxxxxxxx,dynamic,vgw-yyyyyyyy,192.168.0.0/16",
-			"AllowedPattern": "([v|t]gw-[a-zA-Z0-9]{8,17},(dynamic|(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})),?)*",
-			"ConstraintDescription": "must be in the form 'vgw-xxxxxxxx,dynamic' or 'vgw-xxxxxxxx,10.0.0.0/16'"
+			"Default": "tgw-0bd36a34fd7962772, dynamic, vgw-0cbb28ae7e8db7ee7, dynamic",
+			"AllowedPattern": "([v|t]gw-[a-zA-Z0-9]{8,17} ?, ?([D|d]ynamic|(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})),? ?)*",
+			"ConstraintDescription": "must be in the form '[tgw|vgw]-xxxxxxxx,dynamic' or '[tgw|vgw]-xxxxxxxx,10.0.0.0/16'"
 			},
 		"IkeVersion":{
 			"Description": "IKE version to use (ikev1 or ikev2)",
@@ -142,7 +149,17 @@
 			"Description": "Rekey-fuzz value. The deployed CGW may have several VPNs on it, so 25% randomization is recommended in that case",
 			"Type": "String",
 			"Default": "50%"
-			}
+      },
+    "StrongVersion": {
+      "Description": "The Strongswan version to deploy (Value cannot be updated later. Also, not all versions have been tested or are guaranteed to deploy successfully).",
+      "Type": "String",
+      "Default": "strongswan-5.7.2"
+		},
+		"StrongDependencies": {
+			"Description": "The Strongswan build dependencies that will be installed by yum. These can be different for different Strongswan versions.",
+			"Type": "String",
+			"Default": "gmp gmp-devel gawk flex bison gcc xmlto bind-devel nss-devel nspr-devel libcap-ng libpcap-devel libcap-ng-devel"
+		}
 	},
 	
 	"Mappings": {
@@ -378,11 +395,24 @@
 					"config" : {
 						"packages": {
 							"yum": {
-								"strongswan": [],
 								"quagga": []
 								}
 							},
 						"files":{
+							"/etc/ipsec.conf" : {
+								"content": { "Fn::Join" : ["", [
+									"# Do not place your VPN 'conn' configs in this file.\n",
+									"# Instead put them in /etc/strongswan/ipsec.conf\n",
+									"include /etc/strongswan/ipsec.conf\n"]]
+								}
+							},
+							"/etc/ipsec.secrets": {
+								"content": { "Fn::Join" : ["", [
+									"# Do not place your PSKs in this file.\n",
+									"# Instead put them in /etc/strongswan/ipsec.secrets\n",
+									"include /etc/strongswan/ipsec.secrets\n"]]
+								}
+							},
 							"/etc/cfn/cfn-hup.conf" : {
 							  "content" : { "Fn::Join" : ["", [
 								"[main]\n",
@@ -400,8 +430,8 @@
 								"[cfn-auto-reloader-hook]\n",
 								"triggers=post.update\n",
 								"path=Resources.CgwEc2.Metadata.AWS::CloudFormation::Init\n",
-								"action=/opt/aws/bin/cfn-init -s ", { "Ref" : "AWS::StackId" }, " -r CgwEc2 ",
-								" --region ", { "Ref" : "AWS::Region" }, "\n",  
+								"action=$(/opt/aws/bin/cfn-init -s ", { "Ref" : "AWS::StackId" }, " -r CgwEc2 ",
+								" --region ", { "Ref" : "AWS::Region" }, ";python /etc/strongswan/configure.py;killall cfn-hup && /opt/aws/bin/cfn-hup --verbose)\n",
 								"runas=root\n"
 							  ]]}
 							},
@@ -410,7 +440,18 @@
 							  "log file /var/log/quagga/bgpd\n",
 							  "router bgp ",{"Ref":"Asn"},"\n",
 							  "\tnetwork ",{"Ref":"VpcCidr"},"\n"
-							  ]]}
+								]]},
+								"owner" : "quagga",
+								"group" : "quagga"
+							},
+							"/etc/quagga/zebra.conf" : {
+								"content": { "Fn::Join": ["", [
+									"hostname cgw-tester\n",
+									"interface lo\n",
+									"interface eth0\n"
+									]]},
+									"owner" : "quagga",
+									"group" : "quagga"
 							},
 							"/etc/quagga/daemons": {
 							  "content": { "Fn::Join": ["", [
@@ -420,79 +461,75 @@
 							  "ospf6d=no\n",
 							  "ripd=no\n",
 							  "ripngd=no\n"
-							]]}
+							]]},
+							"owner" : "quagga",
+							"group" : "quagga"
 							},
 							"/etc/strongswan/configure.py":{
 							 "source": "https://raw.githubusercontent.com/secureoptions/cgw-testing/master/configure.py",
 							 "mode": "000755"
-							},
-							"/etc/strongswan/aws.updown":{
-							 "source": "https://raw.githubusercontent.com/secureoptions/cgw-testing/master/aws.updown",
-							 "mode": "000755"
 							}
 							},
+						"sources": {
+							"/etc/strongswan" : "https://github.com/secureoptions/cgw-testing/raw/master/cgwdependencies.tar.bz2"
+						},
 						"commands":{
 							"AA": {
-								"command": "rm -f /etc/strongswan/swvars.py"
-								},
-							"AB": {
-								"command": "killall cfn-hup",
-								"ignoreErrors" : "true"
-								},
+								"command": "rm -f /etc/strongswan/cgwdependencies.tar.bz2",
+								"ignoreErrors": "true"
+							},
+							"BAN": {
+									"command": "rm -f /etc/strongswan/cgwdependencies/swvars.py",
+									"ignoreErrors": "true"
+							},
+							"BAO": {
+									"command": "chkconfig /opt/aws/bin/cfn-hup on",
+									"ignoreErrors": "true"
+							},
 							"BSN":{
-								"command": "echo ASN=\"$ASN\" >> /etc/strongswan/swvars.py",
+								"command": "echo asn=\"$ASN\" >> /etc/strongswan/cgwdependencies/swvars.py",
 								"env": { "ASN": {"Ref": "Asn"}}
 							},
-							"BAM": {
-								"command": "/opt/aws/bin/cfn-hup --verbose"
-							},
 							"BGWS":{
-								"command": "echo VGWS=\"'$VGWS'\" >> /etc/strongswan/swvars.py",
+								"command": "echo vgws=\"'$VGWS'\" >> /etc/strongswan/cgwdependencies/swvars.py",
 								"env": { "VGWS": {"Ref": "Vgws"}}
 							},
 							"IKEVERSION": {
-								"command" : "echo IKEVERSION=\"'$IKEVERSION'\" >> /etc/strongswan/swvars.py",
+								"command" : "echo ikeVersion=\"'$IKEVERSION'\" >> /etc/strongswan/cgwdependencies/swvars.py",
 								"env": { "IKEVERSION": {"Ref": "IkeVersion"}}
 							},
 							"IKEPARAMETERS": {
-								"command" : "echo IKEPARAMETERS=\"'$IKEPARAMETERS'\" >> /etc/strongswan/swvars.py",
+								"command" : "echo ikeParameters=\"'$IKEPARAMETERS'\" >> /etc/strongswan/cgwdependencies/swvars.py",
 								"env": { "IKEPARAMETERS": {"Ref": "IkeParameters"}}
 							},
 							"IKELIFETIME": {
-								"command" : "echo IKELIFETIME=\"'$IKELIFETIME'\" >> /etc/strongswan/swvars.py",
+								"command" : "echo ikeLifeTime=\"'$IKELIFETIME'\" >> /etc/strongswan/cgwdependencies/swvars.py",
 								"env": { "IKELIFETIME": {"Ref": "IkeLifetime"}}
 							},
 							"ESPPARAMETERS": {
-								"command" : "echo ESPPARAMETERS=\"'$ESPPARAMETERS'\" >> /etc/strongswan/swvars.py",
+								"command" : "echo espParameters=\"'$ESPPARAMETERS'\" >> /etc/strongswan/cgwdependencies/swvars.py",
 								"env": { "ESPPARAMETERS": {"Ref": "EspParameters"}}
 							},
 							"ESPLIFETIME": {
-								"command" : "echo ESPLIFETIME=\"'$ESPLIFETIME'\" >> /etc/strongswan/swvars.py",
+								"command" : "echo espLifeTime=\"'$ESPLIFETIME'\" >> /etc/strongswan/cgwdependencies/swvars.py",
 								"env": { "ESPLIFETIME": {"Ref": "EspLifetime"}}
 							},
 							"MARGIN": {
-								"command" : "echo MARGIN=\"'$MARGIN'\" >> /etc/strongswan/swvars.py",
+								"command" : "echo margin=\"'$MARGIN'\" >> /etc/strongswan/cgwdependencies/swvars.py",
 								"env": { "MARGIN": {"Ref": "Margin"}}
 							},
 							"FUZZ": {
-								"command" : "echo FUZZ=\"'$FUZZ'\" >> /etc/strongswan/swvars.py",
+								"command" : "echo fuzz=\"'$FUZZ'\" >> /etc/strongswan/cgwdependencies/swvars.py",
 								"env": { "FUZZ": {"Ref": "Fuzz"}}
 							},
-							"LOCAL_ROUTES":{
-								"command": "echo LOCAL_ROUTES=\"'$LOCAL_ROUTES'\" >> /etc/strongswan/swvars.py",
-								"env": { "LOCAL_ROUTES": {"Ref": "VpcCidr"}}
-							},
-							"STARTZ": {
-								"command": "/usr/bin/python /etc/strongswan/configure.py",
-								"ignoreErrors": "true"
+							"LOCALROUTE": {
+								"command" : "echo localRoute=\"'$LOCALROUTE'\" >> /etc/strongswan/cgwdependencies/swvars.py",
+								"env": { "LOCALROUTE": {"Ref": "VpcCidr"}}
 							}
-
 						}
 				}
 			}
 		},
-					
-					
 		"Properties":{	
 			  "ImageId" : { "Fn::FindInMap" : [ "RegionMap", { "Ref" : "AWS::Region" }, "Strongswan" ]},
 			  "InstanceType" : {"Ref":"Type"},
@@ -512,16 +549,27 @@
 						} ],
 			  "UserData": { "Fn::Base64" : { "Fn::Join" : ["", [
 				 "#!/bin/bash -xe\n",
-				 "yum-config-manager --enable epel\n",
 				 "pip install boto3\n",
 				 "pip install ec2-metadata\n",
-				 "# Install the files and packages from the metadata\n",
-				 "/opt/aws/bin/cfn-init -v ",
-				 "         --stack ", { "Ref" : "AWS::StackName" },
-				 "         --resource CgwEc2 ",
-				 "         --region ", { "Ref" : "AWS::Region" }, "\n"
+				 "mkdir -p /etc/strongswan/",
+				 "# Install dependencies for Strongswan build\n",
+				 "yum install ", {"Ref" : "StrongDependencies"}, " -y\n",
+				 "# Install Strongswan\n",
+				"wget http://download.strongswan.org/", {"Ref": "StrongVersion"}, ".tar.bz2\n",
+				"tar xjvf strongswan*\n",
+				"cd strongswan*\n",
+				"./configure --prefix=/usr --sysconfdir=/etc\n",
+				"make && make install\n",
+				"cd /etc/strongswan\n",
+				"# Install the files and packages from the metadata\n",
+				"/opt/aws/bin/cfn-init -v ",
+				"         --stack ", { "Ref" : "AWS::StackName" },
+				"         --resource CgwEc2 ",
+				"         --region ", { "Ref" : "AWS::Region" }, "\n",
+				"python /etc/strongswan/configure.py\n",
+				"/opt/aws/bin/cfn-hup --verbose\n"
 			]]}}
 		}
-      }
-    }
- }
+			}
+		}
+}
