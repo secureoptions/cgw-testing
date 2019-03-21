@@ -23,17 +23,17 @@ For BGP VPNs, use the type 'dynamic' and for static VPNs, provide the *remote* V
  
  tgw-xxxxxxxx,dynamic, vgw-yyyyyyyy,192.168.0.0/16, tgw-zzzzzzzz,dynamic
  
- ## Adding or Removing Existing VPNs
+ ## Making changes to existing VPNs
+ You can change any of the Strongswan IPSEC settings through a stack update. You CANNOT change certain settings, such as VPN type, Strongswan version build or dependencies. In order to change the VPN type, you will need to delete the VPN (by removing the gw id and type from the cloudformation, then updating stack) and then re-add it.
+ 
+ Here is how you make changes to Cloudformation:
  1) Select the cloudformation stack
  2) Select __Actions > Update Stack__
  3) Choose __Use current template__ and click __Next__
- 4) Add or remove the desired VGWs(remember to remove its routing type as well) and click __Next__
- 5) Scroll to the bottom of the next page and click __Next__
- 6) Check the box that says *I acknowledge that AWS CloudFormation might create IAM resources.*
- 7) click __Update__
+ 4) Add or remove the desired GWs (remember to remove its routing type as well) and and make any changes to IPSEC parameters.        
+ 5) Click __Next__
+ 6) Scroll to the bottom of the next page and click __Next__
+ 7) Check the box that says *I acknowledge that AWS CloudFormation might create IAM resources.*
+ 8) click __Update__
  
- You can also update any IPSEC parameters through Cloudformation, but you cannot change the VPN type (ie. Dynamic vs. Static) or the Strongswan version that was installed at deployment. If you wish to create a different VPN type, then you must:
- 1) Remove the '\<gw id\>, \<type\>' and update the stack.
- 2) After the update has successfully finished, and you see the previous VPN deleted, you may re-add the VPN with the desired type in a second stack update.
-  
- It can take 2 or 3 minutes for updates to take effect
+ It can take 2 or 3 minutes for updates to take effect.
