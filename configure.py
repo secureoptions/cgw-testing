@@ -1,3 +1,5 @@
+# CGW Tester version2.0
+
 import boto3
 from botocore.exceptions import ClientError
 import re
