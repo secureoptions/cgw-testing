@@ -87,7 +87,7 @@ for g in gws_dict:
                     rtype = True
                 
                 cgw = a.Cgw(b.asn, region_name=r['RegionName'])
-                vpn = a.Vpn(cgw.id, g, rtype, region_name=r['RegionName'])
+                vpn = a.Vpn(cgw.id, g, rtype, b.localRoute, region_name=r['RegionName'])
 
                 # Configure tunnel 1
                 mark = int(mark)
@@ -131,7 +131,7 @@ for g in gws_dict:
                 else:
                     rtype = True
                 cgw = a.Cgw(b.asn, region_name=r['RegionName'])
-                vpn = a.Vpn(cgw.id, g, rtype, region_name=r['RegionName'])
+                vpn = a.Vpn(cgw.id, g, rtype, b.localRoute, region_name=r['RegionName'])
                 
 
                 # Configure tunnel 1
