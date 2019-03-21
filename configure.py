@@ -173,7 +173,7 @@ existing_conns = c.fetchall()
 for vpn in existing_conns:
     if vpn[1] not in gws:
         a.del_vpn(vpn[0], region_name=vpn[2])
-        c.execute('''DELETE FROM resources WHERE gateway=?''', (vpn[1]))
+        c.execute('''DELETE FROM resources WHERE gateway=?''', (vpn[1],))
 
 conn.commit()
 conn.close()
